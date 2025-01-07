@@ -32,10 +32,13 @@ namespace mp3player
         private MediaPlayer musicPlayer;
         private List<Song> songQueue;
         public List<Song> songList;
+        private List<Song> songHistory;
         private string state;
         TimeSpan timeSpan;
         DispatcherTimer timer;
         Song playingSong;
+        private int lastPos;
+        private int historyPos;
 
 
         public MainWindow()
@@ -46,6 +49,7 @@ namespace mp3player
             musicController.listMusicFiles();
             songList = musicController.listMusicFiles();
             songQueue = new List<Song>();
+            songHistory = new List<Song>();
 
 
             timer = new DispatcherTimer();
@@ -59,7 +63,8 @@ namespace mp3player
             sliderBarVolume.Value = (double)Properties.Settings.Default["volume"];
 
 
-
+            lastPos = -1;
+            historyPos = songHistory.Count;
             queueListView.ItemsSource = songQueue;
 
         }
@@ -73,6 +78,18 @@ namespace mp3player
             {
                 PlayFile(song.path);
                 playingSong = song;
+
+                lastPos = getSongPosition(song.path);
+
+                if(songHistory.Count < 50)
+                {
+                    songHistory.Add(song);
+                }
+                else
+                {
+                    songHistory.RemoveAt(0);
+                    songHistory.Add(song);
+                }
             }
             
 
@@ -146,6 +163,7 @@ namespace mp3player
 
         private void MusicPlayer_MediaEnded(object sender, EventArgs args)
         {
+            /*
             sliderBar.Value = 0;
 
             //PlayFile(songList.FirstOrDefault().path);
@@ -177,6 +195,8 @@ namespace mp3player
                 }
 
             }
+            */
+            playNextSong();
         }
 
         private void btPlayOnClick(object sender, RoutedEventArgs e)
@@ -340,13 +360,13 @@ namespace mp3player
             if(queueListView.Opacity == 0)
             {
                 var animation = (Storyboard)FindResource("PopUpAnimation");
-
+                queueListView.Visibility = Visibility.Visible;
                 animation.Begin(queueListView);
             }
             else
             {
                 var animation = (Storyboard)FindResource("PopDownAnimation");
-
+                queueListView.Visibility = Visibility.Hidden;
                 animation.Begin(queueListView);
             }
             
@@ -360,6 +380,114 @@ namespace mp3player
                 songQueue.Remove(song);
             }
             queueListView.Items.Refresh();
+        }
+
+        private void buttonSkipNext(object sender, RoutedEventArgs e)
+        {
+            playNextSong();
+        }
+        private void buttonSkipPrevious(object sender, RoutedEventArgs e)
+        {
+                
+        }
+
+        private void playNextSong()
+        {
+            sliderBar.Value = 0;
+            timer.Stop();
+            state = "notplaying";
+            setPlayBtnBackground();
+
+            if (songQueue.Count != 0)
+            {
+                PlayFile(songQueue.First().path);
+                playingSong = songQueue.First();
+                songQueue.RemoveAt(0);
+                queueListView.Items.Refresh();
+
+                if (songHistory.Count < 50)
+                {
+                    songHistory.Add(songQueue.First());
+                }
+                else
+                {
+                    songHistory.RemoveAt(0);
+                    songHistory.Add(songQueue.First());
+                }
+            }
+            else
+            {
+                //int pos = getSongPosition(playingSong.path);
+                int pos = lastPos;
+                if (pos == songList.Count)
+                {
+                    pos = 0;
+                    lastPos = -1;
+                }
+                else
+                {
+                    lastPos++;
+                }
+
+                if (pos + 1 < songList.Count)
+                {
+                    PlayFile(songList.ElementAt(pos + 1).path);
+                    playingSong = songList.ElementAt(pos + 1);
+
+                    if (songHistory.Count < 50)
+                    {
+                        songHistory.Add(playingSong);
+                    }
+                    else
+                    {
+                        songHistory.RemoveAt(0);
+                        songHistory.Add(playingSong);
+                    }
+                }
+                else
+                {
+                    PlayFile(songList.FirstOrDefault().path);
+                    playingSong = songList.FirstOrDefault();
+
+                    if (songHistory.Count < 50)
+                    {
+                        songHistory.Add(playingSong);
+                    }
+                    else
+                    {
+                        songHistory.RemoveAt(0);
+                        songHistory.Add(playingSong);
+                    }
+
+                }
+
+            }
+        }
+
+        private void btnPreviousSongMouseDown(object sender, MouseButtonEventArgs e)
+        {
+        //    e.Handled = true;
+            
+
+        //    if (e.ClickCount > 1)
+        //    {
+        //        if(songHistory.Count > 0)
+        //        {
+        //            historyPos--;
+        //            Song currSong = songHistory.ElementAt(historyPos);
+        //            PlayFile(currSong.path);
+        //            playingSong = currSong;
+        //            historyPos++;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        timer.Stop();
+        //        musicPlayer.Pause();
+        //        musicPlayer.Position = TimeSpan.FromMilliseconds(0);
+        //        musicPlayer.Play();
+        //        timer.Start();
+        //    }
         }
     }
 }
