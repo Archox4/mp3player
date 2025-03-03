@@ -33,5 +33,17 @@ namespace mp3player.Properties {
                 this["volume"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("normal")]
+        public string playMode {
+            get {
+                return ((string)(this["playMode"]));
+            }
+            set {
+                this["playMode"] = value;
+            }
+        }
     }
 }
