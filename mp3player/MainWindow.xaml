@@ -102,7 +102,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button Style="{StaticResource pathButtonStyle}"  Content="Button" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" Width="800" Margin="0,29,0,0"/>
+        <Button x:Name="btPath" Style="{StaticResource pathButtonStyle}"  Content="Change folder" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" Width="800" Margin="0,29,0,0" Click="btSetPath"/>
 
         <Image x:Name="songImg" HorizontalAlignment="Left" Height="94" Margin="28,656,0,0" VerticalAlignment="Top" Width="94"/>
         <Label x:Name="lbSongName" Content="-" HorizontalAlignment="Left" VerticalAlignment="Top" Height="36" Width="313" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Margin="138,660,0,0"/>
@@ -132,13 +132,13 @@
             </ListView.View>
 
         </ListView>
-        <Button Margin="673,684,0,0" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" Click="buttonSkipNext" HorizontalAlignment="Left" Width="72">
+        <Button x:Name="btnNext" Margin="673,684,0,0" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" Click="buttonSkipNext" HorizontalAlignment="Left" Width="72">
             <materialDesign:PackIcon Kind="SkipNext" Height="36" Width="40" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#DDFFFFFF"/>
         </Button>
-        <Button Margin="547,684,0,0" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" Click="buttonPrevious" HorizontalAlignment="Left" Width="72">
+        <Button x:Name="btnPrevious" Margin="547,684,0,0" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" Click="buttonPrevious" HorizontalAlignment="Left" Width="72">
             <materialDesign:PackIcon Kind="SkipPrevious" Height="36" Width="40" VerticalAlignment="Center" />
         </Button>
-        <Label x:Name="test1" Content="Label" HorizontalAlignment="Left" Margin="847,713,0,0" VerticalAlignment="Top" Height="41" Width="132" Foreground="#E5FFF7F7" Background="{x:Null}"/>
+        <Label x:Name="test1" Content="Label" HorizontalAlignment="Left" Margin="847,713,0,0" VerticalAlignment="Top" Height="41" Width="132" Foreground="#E5FFF7F7" Background="{x:Null}" Visibility="Hidden"/>
         <Button x:Name="btnPlayMode" HorizontalAlignment="Left" Margin="511,684,0,0" VerticalAlignment="Top" BorderBrush="{x:Null}" Height="32" Width="32" Click="changePlayMode">
             <Button.Background>
                 <ImageBrush ImageSource="/Images/playNormal.png" Stretch="Fill"/>

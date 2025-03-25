@@ -50,16 +50,26 @@ namespace mp3player
         {
             InitializeComponent();
 
-            musicController = new MusicController(@"C:\Users\w\Music\");
-            musicController.listMusicFiles();
-            songList = musicController.listMusicFiles();
+            musicController = new MusicController();
+            if (Properties.Settings.Default["path"].ToString().Length > 0)
+            {
+                songList = musicController.listMusicFiles(Properties.Settings.Default["path"].ToString());
+                listView.ItemsSource = songList;
+
+                btPath.Content = Properties.Settings.Default["path"].ToString();
+            }
+            else
+            {
+                songList = null;
+                disableUI();
+            }
+            //songList = musicController.listMusicFiles(@"C:\Users\w\Music\");
             songQueue = new List<Song>();
             songHistory = new List<Song>();
             songListRandom = new List<Song>();
 
 
             timer = new DispatcherTimer();
-            listView.ItemsSource = songList;
             musicPlayer = new MediaPlayer();
             musicPlayer.MediaEnded += MusicPlayer_MediaEnded;
             
@@ -69,13 +79,17 @@ namespace mp3player
             musicPlayer.Volume = (double)Properties.Settings.Default["volume"];
             sliderBarVolume.Value = (double)Properties.Settings.Default["volume"];
             playMode = (string)Properties.Settings.Default["playMode"];
-            if(playMode == "random")
+            if (songList!= null)
             {
-                songListRandom = songList;
-                Shuffle(songListRandom);
+                if (playMode == "random")
+                {
+                    songListRandom = songList;
+                    Shuffle(songListRandom);
 
-                randomPos = -1;
+                    randomPos = -1;
+                }
             }
+            
 
             test1.Content = playMode;
             setBackgrounds();
@@ -249,80 +263,6 @@ namespace mp3player
             Properties.Settings.Default.Save();
         }
 
-        //private void btnPlayMousEnter(object sender, MouseEventArgs e)
-        //{
-        //    if(state == "playing")
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPause2.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    } else
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPlay2.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    }
-        //}
-
-        //private void btnPlayMousLeave(object sender, MouseEventArgs e)
-        //{
-        //    if (state == "playing")
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPause.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    }
-        //    else
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPlay.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    }
-        //}
-
-        //private void setPlayBtnBackground()
-        //{
-        //    if (state == "playing")
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPause.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    }
-        //    else if (state == "notplaying")
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPlay.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    }
-        //    else if (state == "paused")
-        //    {
-        //        Uri resourceUri = new Uri("Images/btnPlay.png", UriKind.Relative);
-        //        StreamResourceInfo streamInfo = Application.GetResourceStream(resourceUri);
-        //        BitmapFrame temp = BitmapFrame.Create(streamInfo.Stream);
-        //        var brush = new ImageBrush();
-        //        brush.ImageSource = temp;
-        //        btPlay.Background = brush;
-        //    }
-        //}
-
         private void sliderBar_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
             
@@ -406,7 +346,6 @@ namespace mp3player
             sliderBar.Value = 0;
             timer.Stop();
             state = "notplaying";
-            //setPlayBtnBackground();
 
             if (songQueue.Count != 0)
             {
@@ -442,6 +381,11 @@ namespace mp3player
                     {
                         randomPos = -1;
                         Shuffle(songListRandom);
+                        while(songListRandom.First() == playingSong)
+                        {
+                            Shuffle(songListRandom);
+                        }
+
                         PlayFile(songListRandom.ElementAt(randomPos + 1).path);
                         playingSong = songListRandom.ElementAt(randomPos + 1);
                         randomPos++;
@@ -543,6 +487,52 @@ namespace mp3player
             Properties.Settings.Default["playMode"] = playMode;
             Properties.Settings.Default.Save();
             //
+        }
+
+        private void btSetPath(object sender, RoutedEventArgs e)
+        {
+            string path = Clipboard.GetText();
+            
+            if(Regex.IsMatch(path, @"([A-Z]{1})(\:\\)"))
+            {
+                test1.Content = "matches";
+                if (musicController.isPathCorrect(path))
+                {
+
+                    songList = musicController.listMusicFiles(path);
+
+                    listView.ItemsSource = null;
+                    listView.ItemsSource = songList;
+
+                    enableUI();
+
+                    playMode = "normal";
+                    setBackgrounds();
+
+                    btPath.Content = path;
+
+                    Properties.Settings.Default["path"] = path;
+                    Properties.Settings.Default.Save();
+
+                }
+
+            }
+        }
+
+        private void disableUI()
+        {
+            btnPlayMode.IsEnabled = false;
+            btnPrevious.IsEnabled = false;
+            btnNext.IsEnabled = false;
+            btPlay.IsEnabled = false;
+        }
+
+        private void enableUI()
+        {
+            btnPlayMode.IsEnabled = true;
+            btnPrevious.IsEnabled = true;
+            btnNext.IsEnabled = true;
+            btPlay.IsEnabled = true;
         }
     }
 }

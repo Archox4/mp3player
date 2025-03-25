@@ -11,7 +11,7 @@ namespace mp3player
 {
     internal class MusicController
     {
-        private string directoryPath { get; set; }
+        public string directoryPath { get; set; }
         private DirectoryInfo directoryInfo { get; set; }
         private FileInfo[] files { get; set; }
 
@@ -19,16 +19,24 @@ namespace mp3player
 
         public ObservableCollection<Song> songs;
 
-        public MusicController(string DirectoryPath)
+        //public MusicController(string DirectoryPath)
+        //{
+        //    this.directoryPath = DirectoryPath;
+        //    directoryInfo = new DirectoryInfo(DirectoryPath);
+        //    songsList = new List<Song>();
+        //    songs = new ObservableCollection<Song>();
+        //}
+        public MusicController() { }
+
+        public List<Song> listMusicFiles(string DirectoryPath)
         {
             this.directoryPath = DirectoryPath;
             directoryInfo = new DirectoryInfo(DirectoryPath);
             songsList = new List<Song>();
             songs = new ObservableCollection<Song>();
-        }
 
-        public List<Song> listMusicFiles()
-        {
+
+            //
             files = directoryInfo.GetFiles("*.mp3");
             songsList.Clear();
             foreach (FileInfo file in files)
@@ -100,6 +108,21 @@ namespace mp3player
             }
 
             return songs;
+        }
+
+        public bool isPathCorrect(string path)
+        {
+            bool correct = false;
+            try
+            {
+                DirectoryInfo tempDirInfo = new DirectoryInfo(path);
+                FileInfo[] tempFiles = tempDirInfo.GetFiles("*.mp3");
+                if(tempFiles.Count() > 0)
+                {
+                    correct = true;
+                }
+            } catch { }
+            return correct;
         }
     }
 }
